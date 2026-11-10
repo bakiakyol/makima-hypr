@@ -1,6 +1,6 @@
 #!/bin/sh
-# start: starts Hyprland from a TTY (for now on tty2; makima-sway stays on tty1).
-#   ~/.config/makima-hypr/bin/start
+# start-makima: starts Hyprland from a TTY. ~/.zprofile runs it on tty1.
+#   start-makima   (or ~/.config/makima-hypr/bin/start-makima)
 
 # Lenovo: use only the Intel GPU. With the NVIDIA one (nouveau) as well, the cursor
 # stuttered on Sway. The card number can change between boots, so it's found by its
