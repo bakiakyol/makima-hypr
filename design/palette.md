@@ -25,12 +25,14 @@ Early mockups: `design/mockup.png` and `design/bar-comparison.png` (option B was
 |---|---|---|
 | black | `#22140e` | `#6b5348` |
 | red | `#e22e0e` | `#ff5a3c` |
-| green | `#8fa86b` | `#a9c285` |
+| green (sage) | `#9fc17d` | `#bada9c` |
 | yellow | `#f2a33a` | `#ffc266` |
-| blue | `#6a8fa8` | `#8eb0c6` |
-| magenta | `#c9566b` | `#e07a8c` |
-| cyan | `#4f8f88` | `#74b3ab` |
+| blue (lavender) | `#b7b6f6` | `#d1d1ff` |
+| magenta (rose) | `#f196a4` | `#ffb3bf` |
+| cyan (teal) | `#58b4c4` | `#7cccdb` |
 | white | `#c9b8a6` | `#e8dccb` |
+
+Green, blue, magenta and cyan are the "uyumlu" set: built in OKLCH around amber and crimson, at the same perceived lightness (L 0.72-0.80) with hues spread around the wheel (rose 10, sage 130, teal 210, lavender 285). Every pair of syntax colors is at least 13 OKLab dE apart. The zsh command-line colors (`config/zsh/makima.zsh`) use the same set, and Claude Code's `dark-ansi` theme picks them up from here.
 
 Background `#140b07` (alpha 0.93), foreground `#e8dccb`, cursor a crimson block `#e22e0e`, selection `#3a231a`.
 
