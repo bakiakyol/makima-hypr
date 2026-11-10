@@ -98,6 +98,12 @@ hl.config({
             passes   = 1,
             vibrancy = 0.17,
         },
+
+        -- Windows wobble like jelly while dragged. Costs the most of all the effects here:
+        -- measured about 3-4x the CPU of having it off (11 Nov 2026). Set false to save battery.
+        wobble = {
+            enabled = true,
+        },
     },
 
     misc = {
