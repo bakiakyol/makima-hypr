@@ -243,6 +243,8 @@ hl.window_rule({
 })
 
 -- ---------- helpers ----------
+-- Floating windows always fit on their monitor (standard size, shrink, center)
+local float_fit = dofile(M .. "/config/hypr/float-fit.lua")
 local function exec(cmd) return hl.dsp.exec_cmd(cmd) end
 
 -- Super+u: show/hide the dropdown terminal, start it on the first press
@@ -311,7 +313,7 @@ end
 
 -- ---------- layout ----------
 hl.bind(mod .. " + F",           hl.dsp.window.fullscreen({ action = "toggle" }), { desc = "Fullscreen on/off" })
-hl.bind(mod .. " + SHIFT + space", hl.dsp.window.float({ action = "toggle" }),    { desc = "Floating on/off" })
+hl.bind(mod .. " + SHIFT + space", float_fit.float_toggle,                       { desc = "Floating on/off (standard size, centered)" })
 hl.bind(mod .. " + space",       focus_mode_toggle,                               { desc = "Focus floating / tiled" })
 hl.bind(mod .. " + E",           hl.dsp.layout("togglesplit"),                    { desc = "Split side by side / stacked" })
 -- Tabs: Hyprland's groups play the part of Sway's tabbed layout
