@@ -1,0 +1,8 @@
+# battery-warning.service: runs bin/battery-warning once (started by battery-warning.timer)
+# Source: ~/.config/makima-hypr/config/systemd/battery-warning.service
+[Unit]
+Description=Low battery popup (makima-hypr)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/battery-warning

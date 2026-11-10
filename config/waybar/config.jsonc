@@ -1,0 +1,124 @@
+// ~/.config/waybar/config.jsonc: thin Makima-themed top strip
+// Source: ~/.config/makima-hypr/config/waybar/config.jsonc
+// Look (colors, spacing): style.css
+// Icons come from JetBrainsMono Nerd Font.
+{
+	"layer": "top",
+	"position": "top",
+	"height": 24,
+	"spacing": 0,
+
+	// Left: workspaces and the current mode (like resize mode)
+	"modules-left": ["hyprland/workspaces", "hyprland/submap"],
+	// Center: date and time
+	"modules-center": ["clock"],
+	// Right: keep awake, Do Not Disturb bell (only while on), Wi-Fi, volume, brightness, battery
+	"modules-right": ["idle_inhibitor", "custom/dnd", "network", "bluetooth", "wireplumber", "backlight", "battery"],
+
+	"hyprland/workspaces": {
+		// Each bar shows only its own screen's workspaces, and only the ones in use
+		"all-outputs": false,
+		"format": "{name}"
+	},
+
+	"hyprland/submap": {
+		"format": "{}"
+	},
+
+	"clock": {
+		// Example: Wed  4 Nov  07:31
+		// (To follow your system language instead, use "{:L%a %e %b  %H:%M}" and set "locale".)
+		"format": "{:%a %e %b  %H:%M}",
+		"interval": 30,
+		// Month calendar on hover
+		"tooltip-format": "<tt>{calendar}</tt>",
+		"calendar": {
+			"mode": "month",
+			"weeks-pos": "",
+			"format": {
+				"months": "<span color='#e8dccb'><b>{}</b></span>",
+				"weekdays": "<span color='#9f7f70'>{}</span>",
+				"today": "<span color='#e22e0e'><b>{}</b></span>"
+			}
+		}
+	},
+
+	// Keep awake: click to stop the screen from locking and turning off (reading, a talk).
+	// Turns itself off after 2 hours, so it can't be forgotten. Locking by hand still works.
+	"idle_inhibitor": {
+		"format": "{icon}",
+		"format-icons": { "activated": "󰅶", "deactivated": "󰾪" },
+		"tooltip-format-activated": "Keep awake: on (click to turn off)",
+		"tooltip-format-deactivated": "Keep awake: off (click to keep the screen on)",
+		"timeout": 120
+	},
+
+	// Do Not Disturb: a bell, shown only while it's on (bin/dnd). Click or Super+Ctrl+n to toggle.
+	// bin/dnd sends signal 9 when it changes, so this only runs then.
+	"custom/dnd": {
+		"exec": "~/.config/makima-hypr/bin/dnd status",
+		"return-type": "json",
+		"interval": "once",
+		"signal": 9,
+		"on-click": "~/.config/makima-hypr/bin/dnd"
+	},
+
+	// Works with iwd. Click to open the Wi-Fi menu (~/.config/makima-hypr/bin/wifi-menu).
+	// Change "interface" to yours (ip -br link).
+	"network": {
+		"interface": "wlan0",
+		"on-click": "~/.config/makima-hypr/bin/wifi-menu",
+		"format-wifi": "󰖩 {essid}",
+		"format-disconnected": "󰖪 off",
+		"tooltip-format-wifi": "{essid}  signal {signalStrength}%\n{ipaddr}",
+		"tooltip-format-disconnected": "Disconnected",
+		"interval": 10
+	},
+
+	// BlueZ. Shows how many devices are connected; hover for their names (and battery, if they
+	// report it). Click to open the Bluetooth menu (~/.config/makima-hypr/bin/bluetooth-menu).
+	"bluetooth": {
+		"format": "󰂯",
+		"format-off": "󰂲 off",
+		"format-disabled": "󰂲 off",
+		"format-connected": "󰂱 {num_connections}",
+		"tooltip-format": "Bluetooth on, nothing connected",
+		"tooltip-format-off": "Bluetooth off",
+		"tooltip-format-connected": "{device_enumerate}",
+		"tooltip-format-enumerate-connected": "{device_alias}",
+		"tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%",
+		"on-click": "~/.config/makima-hypr/bin/bluetooth-menu"
+	},
+
+	// PipeWire volume. Updates by itself when the volume changes, no signal needed.
+	"wireplumber": {
+		"format": "{icon} {volume}%",
+		"format-muted": "󰝟 muted",
+		"format-icons": ["󰕿", "󰖀", "󰕾"],
+		"on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+		"scroll-step": 5,
+		"max-volume": 100
+	},
+
+	// Scroll to change brightness via the "brightness" script (it keeps a 5 % minimum).
+	// Change "device" to yours (ls /sys/class/backlight).
+	"backlight": {
+		"device": "intel_backlight",
+		"format": "󰃠 {percent}%",
+		"on-scroll-up": "~/.config/makima-hypr/bin/brightness up",
+		"on-scroll-down": "~/.config/makima-hypr/bin/brightness down"
+	},
+
+	// Change "bat" and "adapter" to yours (ls /sys/class/power_supply).
+	"battery": {
+		"bat": "BAT0",
+		"adapter": "ADP0",
+		"interval": 30,
+		"states": { "warning": 30, "critical": 15 },
+		"format": "{icon} {capacity}%",
+		"format-charging": "󰂄 {capacity}%",
+		"format-plugged": "󰚥 {capacity}%",
+		"format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+		"tooltip-format": "{timeTo}"
+	}
+}

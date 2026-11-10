@@ -1,0 +1,11 @@
+#!/bin/sh
+# start: starts Hyprland from a TTY (for now on tty2; makima-sway stays on tty1).
+#   ~/.config/makima-hypr/bin/start
+
+# Lenovo: use only the Intel GPU. With the NVIDIA one (nouveau) as well, the cursor
+# stuttered on Sway. The card number can change between boots, so it's found by its
+# fixed PCI address. (Paths are joined with ":" so the real /dev/dri/cardN is passed.)
+intel_card=/dev/dri/by-path/pci-0000:00:02.0-card
+[ -e "$intel_card" ] && export AQ_DRM_DEVICES="$(readlink -f "$intel_card")"
+
+exec start-hyprland

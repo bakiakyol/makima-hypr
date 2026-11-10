@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""keybindings: a searchable list of the Hyprland keybindings in fuzzel (Super+F1).
+
+Asks the running Hyprland for its binds ("hyprctl -j binds"), so it's always up to date.
+Each bind shows its "desc" from hyprland.lua; binds without one (mouse, media keys,
+resize mode) show their dispatcher instead. Type to filter ("screen", "workspace 3",
+"Shift"...). It only shows the list; Enter or Esc closes it.
+
+Uses only the Python standard library.
+"""
+
+import json
+import subprocess
+
+# Hyprland's modifier bits, in the order they are shown
+MODIFIERS = [(64, "Super"), (4, "Ctrl"), (8, "Alt"), (1, "Shift")]
+KEYS = {
+	"return": "Enter", "space": "Space", "scedilla": "Ş", "escape": "Esc", "tab": "Tab",
+	"left": "←", "right": "→", "up": "↑", "down": "↓",
+	"mouse:272": "Left mouse", "mouse:273": "Right mouse",
+	"xf86audioraisevolume": "Volume up", "xf86audiolowervolume": "Volume down",
+	"xf86audiomute": "Mute", "xf86audiomicmute": "Mic mute",
+	"xf86monbrightnessup": "Brightness up", "xf86monbrightnessdown": "Brightness down",
+}
+
+
+def pretty_keys(bind):
+	mask = bind.get("modmask", 0)
+	parts = [name for bit, name in MODIFIERS if mask & bit]
+	key = str(bind.get("key", ""))
+	parts.append(KEYS.get(key.lower()) or (key.upper() if len(key) == 1 else key))
+	return " + ".join(parts)
+
+
+def pretty_action(bind):
+	if bind.get("description"):
+		return bind["description"]
+	action = " ".join(str(bind.get(k, "")) for k in ("dispatcher", "arg")).strip()
+	return action.replace("hl.dsp.", "")
+
+
+def main():
+	try:
+		out = subprocess.run(["hyprctl", "-j", "binds"], capture_output=True, text=True, check=True).stdout
+		binds = json.loads(out)
+	except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as error:
+		binds, lines = [], [f"Couldn't read the binds from Hyprland: {error}"]
+
+	lines = lines if not binds else []
+	for bind in binds:
+		submap = bind.get("submap") or ""
+		where = f"[{submap}] " if submap and submap != "default" else ""
+		lines.append(f"{where + pretty_keys(bind):<28} {pretty_action(bind)}")
+
+	subprocess.run(
+		["fuzzel", "--dmenu", "--prompt", "Keys ❯ ", "--width", "80", "--lines", "15"],
+		input="\n".join(lines), text=True, capture_output=True,
+	)
+	return 0
+
+
+if __name__ == "__main__":
+	raise SystemExit(main())
