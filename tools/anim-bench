@@ -2,7 +2,7 @@
 # anim-bench: a repeatable animation workload with CPU/GPU measurement (Super+Ctrl+T).
 #
 # For about 30 s it runs the same moves every time, on workspace 9: opens and closes
-# windows, switches workspaces, floats a window and drags it in steps (wobble), shows a
+# windows, switches workspaces, floats a window and drags it in steps and continuously (wobble), shows a
 # special workspace, opens fuzzel and a notification. Meanwhile it samples, every 0.5 s:
 #   cpu   whole-machine CPU busy %
 #   hypr  Hyprland's own CPU, % of one core
@@ -64,6 +64,13 @@ for round in 1 2 3; do
 		for step in 1 2 3 4 5 6 7 8; do
 			[ $((step % 2)) = 0 ] && x=-80 || x=80
 			d "hl.dsp.window.move({ x = $x, y = 40, relative = true, window = \"address:$1\" })"; sleep 0.15
+		done
+	fi
+	# A continuous drag: 40 small steps over about 2 s (stepped moves alone undercount wobble)
+	if [ $# -ge 1 ]; then
+		for step in $(seq 1 40); do
+			[ $(( (step / 10) % 2 )) = 0 ] && x=12 || x=-12
+			d "hl.dsp.window.move({ x = $x, y = 0, relative = true, window = \"address:$1\" })"; sleep 0.05
 		done
 	fi
 	# Special workspace: move one there, show it, hide it

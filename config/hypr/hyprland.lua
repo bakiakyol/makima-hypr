@@ -121,6 +121,11 @@ hl.config({
         },
 
         motion_blur = { enabled = false },
+
+        -- Unfocused windows 25 % darker, and a dimmed backdrop behind the dropdown terminal
+        dim_inactive = true,
+        dim_strength = 0.25,
+        dim_special  = 0.35,
     },
 
     misc = {
@@ -156,6 +161,9 @@ hl.config({
     },
 })
 
+-- Touchpad: swipe three fingers left or right to change workspace
+hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+
 -- ---------- animations ----------
 -- Designed with Claude Fable and measured with tools/anim-bench (11 Nov 2026): Hyprland's own
 -- CPU went from 25 % to 21 % of one core compared with the stock set, with more effects.
@@ -181,15 +189,18 @@ hl.animation({ leaf = "windowsMove",         enabled = true,  speed = 3.6,  spri
 hl.animation({ leaf = "fade",                enabled = true,  speed = 2.4,  bezier = "quick" })
 hl.animation({ leaf = "fadeIn",              enabled = true,  speed = 1.7,  bezier = "almostLinear" })
 hl.animation({ leaf = "fadeOut",             enabled = true,  speed = 1.5,  bezier = "almostLinear" })
+hl.animation({ leaf = "fadeDim",             enabled = true,  speed = 2.5,  bezier = "easeOutQuint" })
 hl.animation({ leaf = "fadeGlow",            enabled = true,  speed = 3,    bezier = "easeOutQuint" })
 hl.animation({ leaf = "layers",              enabled = true,  speed = 2.6,  bezier = "easeOutExpo",  style = "fade" })
 hl.animation({ leaf = "layersIn",            enabled = true,  speed = 2.6,  bezier = "easeOutExpo",  style = "fade" })
 hl.animation({ leaf = "layersOut",           enabled = true,  speed = 1.4,  bezier = "linear",       style = "fade" })
 hl.animation({ leaf = "fadeLayersIn",        enabled = true,  speed = 1.6,  bezier = "almostLinear" })
 hl.animation({ leaf = "fadeLayersOut",       enabled = true,  speed = 1.3,  bezier = "almostLinear" })
-hl.animation({ leaf = "workspaces",          enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesIn",        enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesOut",       enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+-- Workspace switches slide 12 % while fading, so they have a direction. All three leaves are
+-- set: workspacesIn/Out override workspaces, so setting only the parent does nothing.
+hl.animation({ leaf = "workspaces",          enabled = true,  speed = 2.4,  bezier = "easeOutQuint", style = "slidefade 12%" })
+hl.animation({ leaf = "workspacesIn",        enabled = true,  speed = 2.4,  bezier = "easeOutQuint", style = "slidefade 12%" })
+hl.animation({ leaf = "workspacesOut",       enabled = true,  speed = 2.4,  bezier = "easeOutQuint", style = "slidefade 12%" })
 -- The dropdown terminal's special workspace slides down from the top
 hl.animation({ leaf = "specialWorkspaceIn",  enabled = true,  speed = 3,    bezier = "easeOutExpo",  style = "slidefadevert 20%" })
 hl.animation({ leaf = "specialWorkspaceOut", enabled = true,  speed = 1.8,  bezier = "easeInCubic",  style = "slidefadevert 20%" })
@@ -350,8 +361,10 @@ local function read_variant()
     return v
 end
 local current_variant = read_variant()
-if current_variant ~= "base" then
-    dofile(M .. "/tools/anim-variants/" .. current_variant .. ".lua")
+local variant_file = M .. "/tools/anim-variants/" .. current_variant .. ".lua"
+-- A variant that was deleted since it was picked: just stay on this file
+if current_variant ~= "base" and io.open(variant_file, "r") then
+    dofile(variant_file)
 end
 hl.bind(mod .. " + CTRL + V", function()
     local nxt = variants[1]
