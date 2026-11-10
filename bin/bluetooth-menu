@@ -6,7 +6,7 @@ Opens when you click the Bluetooth module in Waybar. You can also run it by hand
 How it works:
 	1. Asks BlueZ over D-Bus (busctl) for the adapter and the known devices.
 	   bluetoothctl prints colored, interactive output, and parsing that would be fragile.
-	2. Shows the paired and connected devices in fuzzel, connected ones first.
+	2. Shows the known devices in fuzzel (paired, trusted, or connected), connected ones first.
 	3. Picking a device offers Connect or Disconnect, and Forget (which asks first).
 	   "Scan for new devices" searches for 10 seconds, then pairs, trusts, and connects
 	   the one you pick, so it reconnects by itself next time.
@@ -142,6 +142,9 @@ def read_state():
 			"name": get("Alias") if "Name" in dev else None,
 			"icon": ICONS.get(get("Icon"), ICON_DEVICE),
 			"paired": get("Paired", False) or get("Bonded", False),
+			# Trusted but not paired happens when a pairing got lost (the speaker was reset, or
+			# paired with a phone in between). Such a device must still show up in the menu.
+			"trusted": get("Trusted", False),
 			"connected": get("Connected", False),
 			"rssi": get("RSSI"),
 			"battery": interfaces.get(f"{BLUEZ}.Battery1", {}).get("Percentage", {}).get("data"),
@@ -195,6 +198,11 @@ def device_menu(d):
 		return 1
 
 	notify("Bluetooth", f"Connecting to {name}…")
+	if not d["paired"]:
+		# Pair first, so the link key is stored and it reconnects by itself next time
+		# (a bare connect works too, but leaves the device unbonded)
+		bluetoothctl("--timeout", "30", "pair", d["address"], timeout=30)
+		bluetoothctl("trust", d["address"])
 	out = bluetoothctl("--timeout", "20", "connect", d["address"], timeout=20)
 	if (device(d["address"]) or {}).get("connected"):
 		notify("Bluetooth", f"Connected to {name}.")
@@ -244,7 +252,8 @@ def scan_and_pair():
 	progress("Scanning for devices…", "done", 100, timeout=1000)
 
 	# Only devices that told us their name: the rest is mostly anonymous phones and beacons
-	found = [d for d in read_state()[1] if not d["paired"] and d["name"]]
+	# (trusted ones are already in the main menu)
+	found = [d for d in read_state()[1] if not d["paired"] and not d["trusted"] and d["name"]]
 	found.sort(key=lambda d: d["rssi"] if d["rssi"] is not None else -999, reverse=True)
 	if not found:
 		notify("Bluetooth", "No new devices found. Is it in pairing mode? Try again.")
@@ -288,7 +297,7 @@ def main():
 		notify("Bluetooth", f"Couldn't turn Bluetooth on. Check: rfkill list\n{last_line(out)}", critical=True)
 		return 1
 
-	known = [d for d in devices if d["paired"] or d["connected"]]
+	known = [d for d in devices if d["paired"] or d["trusted"] or d["connected"]]
 	known.sort(key=lambda d: (not d["connected"], (d["name"] or d["address"]).lower()))
 
 	lines = [label(d) for d in known]

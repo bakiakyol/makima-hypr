@@ -1,6 +1,6 @@
-# dunst config for Sway: Makima palette
+# dunst config for Hyprland: Makima palette
 # Source: ~/.config/makima-hypr/config/dunst/dunstrc
-# Sway starts dunst with "dunst --config <this file>". --config disables the search
+# Hyprland starts dunst with "dunst --config <this file>" (hyprland.lua). --config disables the search
 # for other config files, so ~/.config/dunst (used by another desktop, i3 in my case)
 # never mixes in, and this file never affects that desktop either.
 

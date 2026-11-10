@@ -34,9 +34,6 @@ down) wpctl set-volume "$sink" 10%- ;;
 mute) wpctl set-mute "$sink" toggle ;;
 esac 2>/dev/null || fail volume Volume
 
-# i3status (on i3) needs a signal to refresh; Waybar's wireplumber module updates by itself
-[ -z "$WAYLAND_DISPLAY" ] && pkill -USR1 -x i3status 2>/dev/null
-
 out=$(wpctl get-volume "$sink" 2>/dev/null) || fail volume Volume
 # "Volume: 0.60" or "Volume: 0.60 [MUTED]" -> 60 (wpctl always prints two decimals)
 raw=${out#Volume: }
