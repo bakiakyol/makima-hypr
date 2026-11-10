@@ -47,20 +47,19 @@ hl.on("hyprland.start", function()
     -- GTK3 apps (like Firefox) read the cursor from here on Wayland
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme Makima-Crimson")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 24")
-    -- Wallpaper (swaybg for now; hyprpaper later)
-    hl.exec_cmd("swaybg -m fill -i " .. M .. "/wallpapers/makima-torii.jpg")
+    -- Tell systemd and D-Bus which display this is, so services they start (the screen
+    -- sharing portal, dunst, ...) can find it. Sway does this in /etc/sway/config.d.
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
+    -- Wallpaper, idle (lock at 10 min, screens off at 11) and the password prompt for apps
+    -- that need root. Their configs: ~/.config/hypr/hyprpaper.conf, hypridle.conf, hyprlock.conf
+    hl.exec_cmd("hyprpaper")
+    hl.exec_cmd("hypridle")
+    hl.exec_cmd("/usr/lib/hyprpolkitagent/hyprpolkitagent")
     -- Bar and notifications, with this repo's own config files
     hl.exec_cmd("waybar -c " .. M .. "/config/waybar/config.jsonc -s " .. M .. "/config/waybar/style.css")
     -- Only one dunst can run per user (D-Bus), and Sway's may still be up on tty1: replace it
     -- so notifications show here. (While both run, Sway's notifications then show here too.)
     hl.exec_cmd("pkill -x dunst; sleep 0.3; dunst --config " .. M .. "/config/dunst/dunstrc")
-    -- Idle (swayidle for now; hypridle later):
-    --   600 s: lock   660 s: screens off, back on with any input   before suspend: lock
-    hl.exec_cmd("swayidle -w"
-        .. " timeout 600 '" .. bin .. "lock'"
-        .. " timeout 660 'hyprctl dispatch \"hl.dsp.dpms({ action = \\\"off\\\" })\"'"
-        .. " resume 'hyprctl dispatch \"hl.dsp.dpms({ action = \\\"on\\\" })\"'"
-        .. " before-sleep '" .. bin .. "lock'")
 end)
 
 -- ---------- look ----------
@@ -107,7 +106,7 @@ hl.config({
     },
 
     misc = {
-        -- No anime mascot wallpaper or logo: swaybg draws ours
+        -- No anime mascot wallpaper or logo: hyprpaper draws ours
         force_default_wallpaper = 0,
         disable_hyprland_logo   = true,
         disable_splash_rendering = true,

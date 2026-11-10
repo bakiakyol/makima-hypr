@@ -1,6 +1,4 @@
 #!/bin/sh
-# lock: locks the screen (Super+x, idle, before suspend).
-# swaylock for now; it works on Hyprland too (ext-session-lock). hyprlock comes later.
-# -f: fork once the lock screen is up, so idle and suspend know the screen is locked.
-# -i: blurred wallpaper (swaylock can't expand ~ in its config file, so it's passed here).
-exec swaylock -f -i "$HOME/.config/makima-hypr/wallpapers/makima-torii-lock.jpg"
+# lock: locks the screen with hyprlock (Super+x; hypridle uses the same command).
+# Its look: ~/.config/hypr/hyprlock.conf. pidof: never two lock screens at once.
+pidof hyprlock >/dev/null || exec hyprlock
