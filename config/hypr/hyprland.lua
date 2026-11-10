@@ -65,10 +65,10 @@ end)
 -- ---------- look ----------
 hl.config({
     general = {
-        -- 2 px border: crimson on the focused window, dark on the rest
+        -- 2 px border: crimson-to-amber on the focused window, dark on the rest
         border_size = 2,
         col = {
-            active_border   = c.crimson,
+            active_border   = { colors = { c.crimson, c.amber }, angle = 45 },
             inactive_border = c.surface,
         },
         -- Hyprland's inner gap is per window, so 3 here = 6 px between two windows (as on Sway)
@@ -85,24 +85,42 @@ hl.config({
 
         shadow = {
             enabled      = true,
-            range        = 8,
+            range        = 12,
             render_power = 3,
-            color        = "rgba(000000aa)",
+            color        = "rgba(000000bb)",
+        },
+
+        -- A faint crimson glow around the focused window
+        glow = {
+            enabled        = true,
+            range          = 10,
+            render_power   = 3,
+            color          = "rgba(e22e0e44)",
+            color_inactive = "rgba(7f1d0600)",
         },
 
         -- Blur behind see-through windows (Firefox at 93 %, the bar)
         blur = {
-            enabled  = true,
-            size     = 3,
-            passes   = 1,
-            vibrancy = 0.17,
+            enabled           = true,
+            size              = 3,
+            passes            = 1,
+            vibrancy          = 0.17,
+            new_optimizations = true,
         },
 
-        -- Windows wobble like jelly while dragged. Costs the most of all the effects here:
-        -- measured about 3-4x the CPU of having it off (11 Nov 2026). Set false to save battery.
+        -- Windows wobble like jelly while dragged. Costs the most of all the effects here
+        -- (about 3-4x the CPU of having it off with the default mesh of 12). A mesh of 8 with
+        -- more damping settles sooner and costs less. Set enabled = false to save battery.
         wobble = {
-            enabled = true,
+            enabled   = true,
+            mesh      = 8,
+            stiffness = 260,
+            damping   = 20,
+            mass      = 1,
+            intensity = 0.2,
         },
+
+        motion_blur = { enabled = false },
     },
 
     misc = {
@@ -139,30 +157,48 @@ hl.config({
 })
 
 -- ---------- animations ----------
--- speed is in tenths of a second (speed 4 = 0.4 s)
-hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1} } })
-hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1} } })
-hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}    } })
-hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1} } })
-hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}  } })
-hl.curve("easy",           { type = "spring", mass = 1, stiffness = 238.1191, damping = 24.21279333 })
+-- Designed with Claude Fable and measured with tools/anim-bench (11 Nov 2026): Hyprland's own
+-- CPU went from 25 % to 21 % of one core compared with the stock set, with more effects.
+-- speed is in tenths of a second (speed 4 = 0.4 s).
+hl.curve("easeOutQuint", { type = "bezier", points = { {0.23, 1},  {0.32, 1}  } })
+hl.curve("easeOutExpo",  { type = "bezier", points = { {0.16, 1},  {0.3, 1}   } })
+hl.curve("easeInCubic",  { type = "bezier", points = { {0.4, 0},   {0.9, 0.6} } })
+hl.curve("linear",       { type = "bezier", points = { {0, 0},     {1, 1}     } })
+hl.curve("almostLinear", { type = "bezier", points = { {0.5, 0.5}, {0.75, 1}  } })
+hl.curve("quick",        { type = "bezier", points = { {0.15, 0},  {0.1, 1}   } })
+-- A spring that settles in about 0.28 s, with one small overshoot
+hl.curve("snappy",       { type = "spring", mass = 1, stiffness = 300, damping = 29 })
 
-hl.animation({ leaf = "global",        enabled = true, speed = 10,   bezier = "default" })
-hl.animation({ leaf = "border",        enabled = true, speed = 5.39, bezier = "easeOutQuint" })
-hl.animation({ leaf = "windows",       enabled = true, speed = 4.79, spring = "easy" })
-hl.animation({ leaf = "windowsIn",     enabled = true, speed = 4.1,  spring = "easy",         style = "popin 87%" })
-hl.animation({ leaf = "windowsOut",    enabled = true, speed = 1.49, bezier = "linear",       style = "popin 87%" })
-hl.animation({ leaf = "fadeIn",        enabled = true, speed = 1.73, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeOut",       enabled = true, speed = 1.46, bezier = "almostLinear" })
-hl.animation({ leaf = "fade",          enabled = true, speed = 3.03, bezier = "quick" })
-hl.animation({ leaf = "layers",        enabled = true, speed = 3.81, bezier = "easeOutQuint" })
-hl.animation({ leaf = "layersIn",      enabled = true, speed = 4,    bezier = "easeOutQuint", style = "fade" })
-hl.animation({ leaf = "layersOut",     enabled = true, speed = 1.5,  bezier = "linear",       style = "fade" })
-hl.animation({ leaf = "fadeLayersIn",  enabled = true, speed = 1.79, bezier = "almostLinear" })
-hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.39, bezier = "almostLinear" })
-hl.animation({ leaf = "workspaces",    enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 1.21, bezier = "almostLinear", style = "fade" })
-hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
+-- global is the fallback for every leaf not listed below (it used to be 1 s)
+hl.animation({ leaf = "global",              enabled = true,  speed = 5,    bezier = "default" })
+hl.animation({ leaf = "border",              enabled = true,  speed = 3,    bezier = "easeOutQuint" })
+-- A rotating border gradient would redraw the screen every frame, forever: keep it off
+hl.animation({ leaf = "borderangle",         enabled = false })
+hl.animation({ leaf = "windows",             enabled = true,  speed = 4,    spring = "snappy" })
+hl.animation({ leaf = "windowsIn",           enabled = true,  speed = 3.8,  spring = "snappy",       style = "popin 88%" })
+hl.animation({ leaf = "windowsOut",          enabled = true,  speed = 1.7,  bezier = "easeInCubic",  style = "popin 90%" })
+hl.animation({ leaf = "windowsMove",         enabled = true,  speed = 3.6,  spring = "snappy" })
+hl.animation({ leaf = "fade",                enabled = true,  speed = 2.4,  bezier = "quick" })
+hl.animation({ leaf = "fadeIn",              enabled = true,  speed = 1.7,  bezier = "almostLinear" })
+hl.animation({ leaf = "fadeOut",             enabled = true,  speed = 1.5,  bezier = "almostLinear" })
+hl.animation({ leaf = "fadeGlow",            enabled = true,  speed = 3,    bezier = "easeOutQuint" })
+hl.animation({ leaf = "layers",              enabled = true,  speed = 2.6,  bezier = "easeOutExpo",  style = "fade" })
+hl.animation({ leaf = "layersIn",            enabled = true,  speed = 2.6,  bezier = "easeOutExpo",  style = "fade" })
+hl.animation({ leaf = "layersOut",           enabled = true,  speed = 1.4,  bezier = "linear",       style = "fade" })
+hl.animation({ leaf = "fadeLayersIn",        enabled = true,  speed = 1.6,  bezier = "almostLinear" })
+hl.animation({ leaf = "fadeLayersOut",       enabled = true,  speed = 1.3,  bezier = "almostLinear" })
+hl.animation({ leaf = "workspaces",          enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+hl.animation({ leaf = "workspacesIn",        enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
+hl.animation({ leaf = "workspacesOut",       enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+-- The dropdown terminal's special workspace slides down from the top
+hl.animation({ leaf = "specialWorkspaceIn",  enabled = true,  speed = 3,    bezier = "easeOutExpo",  style = "slidefadevert 20%" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = true,  speed = 1.8,  bezier = "easeInCubic",  style = "slidefadevert 20%" })
+
+-- Per-layer animations: no fade for the wallpaper (a full-screen layer), fuzzel pops in,
+-- notifications slide in from the right
+hl.layer_rule({ name = "wallpaper-noanim", match = { namespace = "^hyprpaper$" },     no_anim = true })
+hl.layer_rule({ name = "launcher-pop",     match = { namespace = "^launcher$" },      animation = "popin 92%" })
+hl.layer_rule({ name = "notif-slide",      match = { namespace = "^notifications$" }, animation = "slide right" })
 
 -- ---------- window rules ----------
 -- Ignore apps asking to be maximized: tiling decides the size
@@ -188,6 +224,7 @@ hl.window_rule({
     size      = { "monitor_w*0.66", "monitor_h*0.65" },
     center    = true,
     workspace = "special:dropdown",
+    animation = "slide top",
 })
 
 -- ---------- helpers ----------
@@ -278,6 +315,9 @@ for i = 1, 10 do
 end
 
 -- ---------- Hyprland itself ----------
+-- Animation benchmark: 30 s of the same moves on workspace 9, then CPU/GPU averages
+-- (tools/anim-bench; results in ~/.local/state/makima-hypr/bench.tsv). Hands off while it runs.
+hl.bind(mod .. " + CTRL + T",    exec(M .. "/tools/anim-bench"), { desc = "Animation benchmark (30 s)" })
 hl.bind(mod .. " + SHIFT + C",   hl.dsp.reload_config(),   { desc = "Reload the config" })
 -- Power menu in fuzzel: lock, suspend, log out, reboot, shut down (the last three ask first)
 hl.bind(mod .. " + SHIFT + E",   exec(bin .. "power-menu"), { desc = "Power menu" })
@@ -296,3 +336,32 @@ hl.define_submap("resize", function()
     hl.bind("escape",      hl.dsp.submap("reset"))
     hl.bind(mod .. " + R", hl.dsp.submap("reset"))
 end)
+
+-- ---------- TEMPORARY: compare animation variants (tools/anim-variants) ----------
+-- Super+Ctrl+V cycles base (this file) -> the files in tools/anim-variants listed in "variants";
+-- Super+Ctrl+T benchmarks the one shown.
+-- Remove this block once a variant is chosen.
+local variant_state = home .. "/.local/state/makima-hypr"
+local variants = { "base" }
+local function read_variant()
+    local f = io.open(variant_state .. "/anim-variant", "r")
+    local v = f and f:read("*l") or "base"
+    if f then f:close() end
+    return v
+end
+local current_variant = read_variant()
+if current_variant ~= "base" then
+    dofile(M .. "/tools/anim-variants/" .. current_variant .. ".lua")
+end
+hl.bind(mod .. " + CTRL + V", function()
+    local nxt = variants[1]
+    for i, v in ipairs(variants) do
+        if v == read_variant() then nxt = variants[i % #variants + 1] end
+    end
+    os.execute("mkdir -p " .. variant_state)
+    for _, name in ipairs({ "anim-variant", "bench-label" }) do
+        local f = io.open(variant_state .. "/" .. name, "w"); f:write(nxt .. "\n"); f:close()
+    end
+    hl.dispatch(hl.dsp.reload_config())
+    hl.exec_cmd("notify-send -t 3000 -h string:x-dunst-stack-tag:variant 'Animation variant' '" .. nxt .. "'")
+end, { desc = "Next animation variant (temporary)" })
