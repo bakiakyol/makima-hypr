@@ -4,7 +4,7 @@
  * Colors: ~/.config/makima-hypr/design/palette.md
  *
  * Waybar uses GTK, so this is GTK CSS (a subset of web CSS).
- * No animations or shadows: the GPU is weak.
+ * The strip stays flat and full width; the blocks on it are rounded like the windows.
  */
 
 /* The palette, defined once and used by name below */
@@ -41,14 +41,18 @@ window#waybar {
 tooltip {
 	background-color: @surface;
 	border: 1px solid @oxblood;
+	border-radius: 8px;
 }
 tooltip label {
 	color: @text;
 }
 
 /* ---------- left: workspaces ---------- */
+/* Rounded blocks with a little air around them (18 px tall in the 24 px strip) */
 #workspaces button {
-	padding: 0 8px;
+	padding: 0 6px;
+	margin: 3px 2px;
+	border-radius: 6px;
 	color: @muted;
 	background: transparent;
 }
@@ -78,6 +82,8 @@ tooltip label {
 	background-color: @copper;
 	color: @night;
 	padding: 0 8px;
+	margin: 3px 2px;
+	border-radius: 6px;
 	font-weight: bold;
 }
 
@@ -86,7 +92,7 @@ tooltip label {
 	font-weight: bold;
 }
 
-/* ---------- right: thin separators between modules ---------- */
+/* ---------- right: modules spaced apart (no separator lines) ---------- */
 #idle_inhibitor,
 #custom-dnd,
 #network,
@@ -95,7 +101,6 @@ tooltip label {
 #backlight,
 #battery {
 	padding: 0 10px;
-	border-left: 1px solid @border;
 }
 
 /* Keep awake: muted while off, amber while on */

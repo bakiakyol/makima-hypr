@@ -205,11 +205,14 @@ hl.animation({ leaf = "workspacesOut",       enabled = true,  speed = 2.4,  bezi
 hl.animation({ leaf = "specialWorkspaceIn",  enabled = true,  speed = 3,    bezier = "easeOutExpo",  style = "slidefadevert 20%" })
 hl.animation({ leaf = "specialWorkspaceOut", enabled = true,  speed = 1.8,  bezier = "easeInCubic",  style = "slidefadevert 20%" })
 
--- Per-layer animations: no fade for the wallpaper (a full-screen layer), fuzzel pops in,
--- notifications slide in from the right
-hl.layer_rule({ name = "wallpaper-noanim", match = { namespace = "^hyprpaper$" },     no_anim = true })
-hl.layer_rule({ name = "launcher-pop",     match = { namespace = "^launcher$" },      animation = "popin 92%" })
-hl.layer_rule({ name = "notif-slide",      match = { namespace = "^notifications$" }, animation = "slide right" })
+-- Per-layer rules: no fade for the wallpaper (a full-screen layer); fuzzel pops in and
+-- notifications slide in from the right. Both are 93 % opaque, so they get the windows' blur;
+-- ignore_alpha keeps the blur out of their transparent rounded corners.
+hl.layer_rule({ name = "wallpaper-noanim", match = { namespace = "^hyprpaper$" }, no_anim = true })
+hl.layer_rule({ name = "launcher-pop",     match = { namespace = "^launcher$" },
+                animation = "popin 92%", blur = true, ignore_alpha = 0.5 })
+hl.layer_rule({ name = "notif-slide",      match = { namespace = "^notifications$" },
+                animation = "slide right", blur = true, ignore_alpha = 0.5 })
 
 -- ---------- window rules ----------
 -- Ignore apps asking to be maximized: tiling decides the size

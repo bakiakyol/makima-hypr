@@ -15,9 +15,10 @@
 	notification_limit = 4
 	padding = 8
 	horizontal_padding = 10
-	frame_width = 1
+	frame_width = 2
 	separator_height = 1
-	corner_radius = 0
+	# Rounded like the windows (8 px), with a 2 px frame
+	corner_radius = 8
 	markup = full
 	format = "<b>%s</b>\n%b"
 	icon_position = off
@@ -35,10 +36,12 @@
 	# Progress bar in the volume and brightness popups
 	progress_bar_height = 6
 	progress_bar_frame_width = 0
+	progress_bar_corner_radius = 4
 
 # Low: passing popups like volume and brightness. Oxblood border, amber bar.
 [urgency_low]
-	background = "#140b07"
+	# ee = 93 % opaque; Hyprland blurs what shows through
+	background = "#140b07ee"
 	foreground = "#e8dccb"
 	highlight = "#f2a33a"
 	frame_color = "#7f1d06"
@@ -46,7 +49,8 @@
 
 # Normal: crimson border (the main accent)
 [urgency_normal]
-	background = "#140b07"
+	# ee = 93 % opaque; Hyprland blurs what shows through
+	background = "#140b07ee"
 	foreground = "#e8dccb"
 	highlight = "#e22e0e"
 	frame_color = "#e22e0e"
