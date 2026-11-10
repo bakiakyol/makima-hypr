@@ -122,7 +122,8 @@ hl.config({
 
         motion_blur = { enabled = false },
 
-        -- Unfocused windows 25 % darker, and a dimmed backdrop behind the dropdown terminal
+        -- Unfocused windows 25 % darker, and a dimmed backdrop behind the dropdown terminal.
+        -- Each monitor keeps its own last focused window bright: dim-per-monitor.lua
         dim_inactive = true,
         dim_strength = 0.25,
         dim_special  = 0.35,
@@ -357,6 +358,9 @@ end)
 -- Remove this block once a variant is chosen.
 local variant_state = home .. "/.local/state/makima-hypr"
 local variants = { "base" }
+-- Per-monitor dimming (see the dim_inactive comment above)
+dofile(M .. "/config/hypr/dim-per-monitor.lua")
+
 local function read_variant()
     local f = io.open(variant_state .. "/anim-variant", "r")
     local v = f and f:read("*l") or "base"

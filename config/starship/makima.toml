@@ -1,0 +1,37 @@
+# makima.toml: starship prompt in the Makima palette (option B: robbyrussell's layout).
+# Looks like:  ➜  makima-hypr git:(main) ✗
+# Loaded through STARSHIP_CONFIG in config/zsh/makima.zsh. Colors: design/palette.md
+add_newline = false
+format = '$character$directory$git_branch$git_status$cmd_duration '
+palette = 'makima'
+
+[palettes.makima]
+crimson = '#e22e0e'
+amber   = '#f2a33a'
+copper  = '#c56b46'
+muted   = '#9f7f70'
+text    = '#e8dccb'
+
+# The arrow is amber, crimson if the last command failed
+[character]
+format = '$symbol  '
+success_symbol = '[➜](bold amber)'
+error_symbol   = '[➜](bold crimson)'
+
+# Only the current folder's name (or the repo's name inside a repo)
+[directory]
+format = '[$path](bold text)'
+truncation_length = 1
+truncate_to_repo = true
+
+[git_branch]
+format = ' [git:\(](bold crimson)[$branch](bold amber)[\)](bold crimson)'
+
+# ✗ when the repo has uncommitted changes
+[git_status]
+format = '( [✗](bold copper))'
+
+# Shown after commands that took 3 s or more
+[cmd_duration]
+format = ' [$duration](muted)'
+min_time = 3000
