@@ -36,7 +36,7 @@ Machine-readable copy: `design/palette.json`. Swatches: `design/palette.svg`.
 
 | | Normal | Bright |
 |---|---|---|
-| black | `#22140e` | `#6b5348` |
+| black | `#22140e` | `#614e45` |
 | red | `#e22e0e` | `#ff5a3c` |
 | green (sage) | `#9fc17d` | `#bada9c` |
 | yellow | `#f2a33a` | `#ffc266` |
@@ -46,6 +46,8 @@ Machine-readable copy: `design/palette.json`. Swatches: `design/palette.svg`.
 | white | `#c9b8a6` | `#e8dccb` |
 
 Green, blue, magenta and cyan are the "uyumlu" set: built in OKLCH around amber and crimson, at the same perceived lightness (L 0.72-0.80) with hues spread around the wheel (rose 10, sage 130, teal 210, lavender 285). Every pair of syntax colors is at least 13 OKLab dE apart. The zsh command-line colors (`config/zsh/makima.zsh`) use the same set, and Claude Code's `dark-ansi` theme picks them up from here.
+
+Bright black `#614e45` is also the background of Claude Code panels and of your own messages (dark-ansi theme), so it is a compromise: cream text on it 5.8:1, as dim text on `night` 2.5:1.
 
 Background `#140b07` (alpha 0.93), foreground `#e8dccb`, cursor a crimson block `#e22e0e`, selection `#3a231a`.
 
