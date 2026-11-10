@@ -29,9 +29,12 @@ local c = {
 
 -- ---------- monitors ----------
 -- Samsung M70D 43" (HDMI) on top, laptop screen centered below it.
--- Positions use scaled sizes: 2560/1.5 = 1706 wide, 1920/1.5 = 1280 wide.
-hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@59.95", position = "0x0",   scale = 1.5 })
-hl.monitor({ output = "eDP-1",    mode = "preferred",       position = "213x960", scale = 1.5 })
+-- Positions use scaled sizes: TV 2560x1440 / 1.6 = 1600x900, laptop 1920x1080 / 1.5 = 1280x720,
+-- so the laptop sits at x = (1600 - 1280) / 2 = 160, y = 900 (right under the TV).
+-- The TV can't be 1.5: Hyprland needs a whole-pixel scaled size (2560 / 1.5 = 1706.67) and
+-- rounds it to 1.6. Valid scales near it: 1.25, 1.333 (1920x1080), 1.6, 1.667.
+hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@59.95", position = "0x0",   scale = 1.6 })
+hl.monitor({ output = "eDP-1",    mode = "preferred",       position = "160x900", scale = 1.5 })
 -- Any other screen: its best mode, placed automatically
 hl.monitor({ output = "",         mode = "preferred",       position = "auto",  scale = "auto" })
 
