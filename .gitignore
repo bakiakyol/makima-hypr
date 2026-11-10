@@ -1,5 +1,6 @@
-# Keep the large original artwork out of the repo (~14 MB); the scaled copies are enough
-wallpapers/original/
+# The wallpaper artwork belongs to its artist (Hikaku) and is not redistributed here.
+# Download it from pixiv and build these with tools/make-wallpaper (see README).
+wallpapers/
 
 # Personal build notes and reviews for my AI agents (Turkish), not needed to use the setup
 PLAN.md

@@ -1,0 +1,33 @@
+#!/bin/bash
+# make-wallpaper: build the two wallpaper images from the original artwork.
+#
+# The artwork is not in this repo: it belongs to its artist, Hikaku. Download it yourself from
+# pixiv, then run this once:
+#   https://www.pixiv.net/en/artworks/113984261   ("マキマ" by Hikaku, 4000x2081)
+#   tools/make-wallpaper ~/Downloads/113984261_p0.png
+#
+# It writes, next to this repo's configs:
+#   wallpapers/makima-torii.jpg       2560x1440, center crop       (hyprpaper.conf)
+#   wallpapers/makima-torii-lock.jpg  the same, blurred and darker (hyprlock.conf)
+# Any image works; the palette was sampled from this one, though.
+# Needs ffmpeg.
+set -euo pipefail
+
+src=${1:-}
+if [ -z "$src" ] || [ ! -f "$src" ]; then
+	sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
+	exit 1
+fi
+command -v ffmpeg >/dev/null || { echo "make-wallpaper: ffmpeg is not installed (sudo pacman -S ffmpeg)" >&2; exit 1; }
+
+dir="$(cd "$(dirname "$0")/.." && pwd)/wallpapers"
+mkdir -p "$dir"
+# Fill 2560x1440 (the larger screen; hyprpaper scales it down for the laptop), crop the middle
+ffmpeg -v error -y -i "$src" \
+	-vf "scale=2560:1440:force_original_aspect_ratio=increase:flags=lanczos,crop=2560:1440" \
+	-q:v 2 "$dir/makima-torii.jpg"
+# The lock screen's blur is baked in, so the GPU doesn't redo it every frame
+ffmpeg -v error -y -i "$dir/makima-torii.jpg" \
+	-vf "gblur=sigma=15,eq=brightness=-0.18:saturation=0.85" \
+	-q:v 3 "$dir/makima-torii-lock.jpg"
+echo "made $dir/makima-torii.jpg and makima-torii-lock.jpg"

@@ -15,7 +15,8 @@
 # A link made by makima-sway is replaced. Any other existing file, or a link pointing
 # somewhere else, is never deleted: it is moved
 # next to itself as "<name>.bak-makima-<date>". Links that are already correct are left alone.
-# It does not install packages and does not touch ~/.bash_profile or ~/.bashrc (see the README).
+# It does not install packages and does not touch ~/.bash_profile, ~/.bashrc or ~/.zshrc
+# (see the README for the one line that loads the zsh colors).
 
 set -eu
 
@@ -176,6 +177,13 @@ if [ -n "$missing" ]; then
 	echo "  missing :$missing  (see Requirements in the README)"
 else
 	echo "  ok       all programs found"
+fi
+if [ -f "$REPO/wallpapers/makima-torii.jpg" ] && [ -f "$REPO/wallpapers/makima-torii-lock.jpg" ]; then
+	echo "  ok       wallpaper"
+else
+	echo "  note     no wallpaper yet: the artwork isn't in this repo (it belongs to its artist)."
+	echo "           Download it from https://www.pixiv.net/en/artworks/113984261, then:"
+	echo "           tools/make-wallpaper ~/Downloads/113984261_p0.png"
 fi
 if [ -d "$HOME/.local/share/icons/Makima-Crimson" ]; then
 	echo "  ok       cursor theme Makima-Crimson"

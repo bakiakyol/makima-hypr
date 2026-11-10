@@ -357,36 +357,6 @@ hl.define_submap("resize", function()
     hl.bind(mod .. " + R", hl.dsp.submap("reset"))
 end)
 
--- ---------- TEMPORARY: compare animation variants (tools/anim-variants) ----------
--- Super+Ctrl+V cycles base (this file) -> the files in tools/anim-variants listed in "variants";
--- Super+Ctrl+T benchmarks the one shown.
--- Remove this block once a variant is chosen.
-local variant_state = home .. "/.local/state/makima-hypr"
-local variants = { "base" }
--- Per-monitor dimming (see the dim_inactive comment above)
+-- ---------- per-monitor dimming ----------
+-- Each monitor keeps its own last focused window bright (see the dim_inactive comment above)
 dofile(M .. "/config/hypr/dim-per-monitor.lua")
-
-local function read_variant()
-    local f = io.open(variant_state .. "/anim-variant", "r")
-    local v = f and f:read("*l") or "base"
-    if f then f:close() end
-    return v
-end
-local current_variant = read_variant()
-local variant_file = M .. "/tools/anim-variants/" .. current_variant .. ".lua"
--- A variant that was deleted since it was picked: just stay on this file
-if current_variant ~= "base" and io.open(variant_file, "r") then
-    dofile(variant_file)
-end
-hl.bind(mod .. " + CTRL + V", function()
-    local nxt = variants[1]
-    for i, v in ipairs(variants) do
-        if v == read_variant() then nxt = variants[i % #variants + 1] end
-    end
-    os.execute("mkdir -p " .. variant_state)
-    for _, name in ipairs({ "anim-variant", "bench-label" }) do
-        local f = io.open(variant_state .. "/" .. name, "w"); f:write(nxt .. "\n"); f:close()
-    end
-    hl.dispatch(hl.dsp.reload_config())
-    hl.exec_cmd("notify-send -t 3000 -h string:x-dunst-stack-tag:variant 'Animation variant' '" .. nxt .. "'")
-end, { desc = "Next animation variant (temporary)" })

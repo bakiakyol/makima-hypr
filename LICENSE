@@ -23,6 +23,8 @@ SOFTWARE.
 ---
 
 This license covers the configuration files and scripts in this repository.
-It does NOT cover the wallpaper artwork in wallpapers/ ("マキマ" by Hikaku,
+It does NOT cover the wallpaper artwork ("マキマ" by Hikaku,
 https://www.pixiv.net/en/artworks/113984261), which remains the property of
-its artist, nor the Makima character (© Tatsuki Fujimoto / Shueisha).
+its artist and is not included here (tools/make-wallpaper builds it from your
+own download), nor the parts of the screenshots that show it, nor the Makima
+character (© Tatsuki Fujimoto / Shueisha).
