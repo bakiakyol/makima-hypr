@@ -17,8 +17,8 @@
 @define-color oxblood #7f1d06;
 @define-color amber   #f2a33a;
 @define-color copper  #c56b46;
-@define-color teal    #4f8f88;
-@define-color green   #8fa86b;
+@define-color teal    #58b4c4;  /* harmonized ("uyumlu") teal */
+@define-color sage    #9fc17d;  /* harmonized ("uyumlu") green */
 
 /* Defaults for everything: reset the GTK theme's borders and corners */
 * {
@@ -124,7 +124,7 @@ tooltip label {
 
 #battery                         { color: @text; }
 #battery.charging,
-#battery.plugged                 { color: @green; }
+#battery.plugged                 { color: @sage; }
 #battery.warning:not(.charging)  { color: @copper; }
 #battery.critical:not(.charging) {
 	color: @crimson;

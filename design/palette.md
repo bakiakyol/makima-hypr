@@ -17,7 +17,20 @@ Early mockups: `design/mockup.png` and `design/bar-comparison.png` (option B was
 | oxblood | `#7f1d06` | hair shadows | bar underline, low-urgency border, critical background |
 | amber | `#f2a33a` | eyes | second accent: volume, progress bars, critical border |
 | copper | `#c56b46` | lit skin | low battery, resize mode |
-| teal | `#4f8f88` | ghostly hands | cool contrast: Wi-Fi |
+| teal | `#58b4c4` | ghostly hands | cool contrast: Wi-Fi, Bluetooth, command options (was `#4f8f88`, retuned with the set below) |
+
+## Harmonized colors ("uyumlu")
+
+Built in OKLCH around amber and crimson so that more colors can sit next to each other (terminal programs, command-line highlighting, Claude Code) without two of them looking alike. All four share the same perceived lightness (L 0.72-0.80) and spread around the hue wheel; with amber and crimson, every pair is at least 13 OKLab dE apart. Each one passes 8:1 contrast on `night`.
+
+| Name | Hex | OKLCH (L C H) | Used for |
+|---|---|---|---|
+| rose | `#f196a4` | 0.77 0.110 10 | variables in the command line, terminal magenta |
+| sage | `#9fc17d` | 0.77 0.099 130 | strings, plugged-in battery, terminal green |
+| teal | `#58b4c4` | 0.72 0.090 210 | options, Wi-Fi, terminal cyan |
+| lavender | `#b7b6f6` | 0.80 0.090 285 | paths, terminal blue |
+
+Machine-readable copy: `design/palette.json`. Swatches: `design/palette.svg`.
 
 ## Terminal (foot) 16 colors
 
