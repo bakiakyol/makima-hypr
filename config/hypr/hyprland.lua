@@ -276,13 +276,15 @@ end
 
 -- ---------- volume and brightness keys (popups via dunst) ----------
 -- locked: also work on the lock screen   repeating: hold the key to keep going
-local media = { locked = true, repeating = true }
-hl.bind("XF86AudioRaiseVolume",  exec(bin .. "volume up"),       media)
-hl.bind("XF86AudioLowerVolume",  exec(bin .. "volume down"),     media)
-hl.bind("XF86AudioMute",         exec(bin .. "volume mute"),     { locked = true })
-hl.bind("XF86AudioMicMute",      exec(bin .. "volume mic"),      { locked = true })
-hl.bind("XF86MonBrightnessUp",   exec(bin .. "brightness up"),   media)
-hl.bind("XF86MonBrightnessDown", exec(bin .. "brightness down"), media)
+local function media(desc, repeating)
+    return { locked = true, repeating = repeating, desc = desc }
+end
+hl.bind("XF86AudioRaiseVolume",  exec(bin .. "volume up"),       media("Volume +10 % (hold to repeat, works when locked)", true))
+hl.bind("XF86AudioLowerVolume",  exec(bin .. "volume down"),     media("Volume -10 %", true))
+hl.bind("XF86AudioMute",         exec(bin .. "volume mute"),     media("Speakers on/off", false))
+hl.bind("XF86AudioMicMute",      exec(bin .. "volume mic"),      media("Microphone on/off", false))
+hl.bind("XF86MonBrightnessUp",   exec(bin .. "brightness up"),   media("Brightness +10 %", true))
+hl.bind("XF86MonBrightnessDown", exec(bin .. "brightness down"), media("Brightness -10 % (never below 5 %)", true))
 
 -- ---------- apps ----------
 hl.bind(mod .. " + Return",      exec("foot"),            { desc = "Terminal (foot)" })
@@ -324,8 +326,8 @@ hl.bind(mod .. " + W",           hl.dsp.group.toggle(),                         
 hl.bind(mod .. " + Tab",         hl.dsp.group.next(),                             { desc = "Next tab" })
 
 -- Super + left mouse: move a window   Super + right mouse: resize it
-hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
-hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true, desc = "Move a window with the mouse" })
+hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, desc = "Resize a window with the mouse" })
 
 -- ---------- workspaces ----------
 for i = 1, 10 do

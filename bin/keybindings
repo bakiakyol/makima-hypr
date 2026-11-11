@@ -2,7 +2,7 @@
 """keybindings: a searchable list of the Hyprland keybindings in fuzzel (Super+F1).
 
 Asks the running Hyprland for its binds ("hyprctl -j binds"), so it's always up to date.
-Each bind shows its "desc" from hyprland.lua; binds without one (mouse, media keys,
+Each bind shows its "desc" from hyprland.lua; binds without one (the keys inside
 resize mode) show their dispatcher instead. Type to filter ("screen", "workspace 3",
 "Shift"...). It only shows the list; Enter or Esc closes it.
 
