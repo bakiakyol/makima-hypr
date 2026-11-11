@@ -10,3 +10,8 @@ Codex-proje-inceleme.md
 
 # Python bytecode (from running the scripts)
 __pycache__/
+
+# Full-quality MP4 masters of the README GIFs (large; GIFs are made from these)
+assets/recordings/raw/
+# Full-size PNG originals of the README screenshots
+assets/screenshots/raw/
