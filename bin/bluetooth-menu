@@ -14,7 +14,7 @@ How it works:
 
 The actions themselves (power, scan, pair, connect...) go through bluetoothctl: a scan only
 runs while the program that started it stays connected to BlueZ, and pairing needs an agent,
-which bluetoothctl registers by itself. Devices that ask you to type a PIN can't be paired
+which pair() registers in an interactive bluetoothctl session. Devices that ask you to type a PIN can't be paired
 from this menu; use bluetoothctl in a terminal for those.
 
 Uses only the Python standard library.
@@ -22,11 +22,19 @@ Uses only the Python standard library.
 
 import html
 import json
+import os
+import re
+import selectors
 import subprocess
 import sys
+import time
 
 BLUEZ = "org.bluez"
 SCAN_SECONDS = 10
+ESCAPE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+# bluetoothctl lines that end a pairing attempt
+PAIR_RESULTS = (b"Pairing successful", b"Failed to pair", b"not available")
+PROMPT = re.compile(r"^\[[^\]]*\]> ")
 
 # Nerd Font icons (Material Design)
 ICON_ON = "\U000f00af"         # bluetooth
@@ -74,6 +82,50 @@ def bluetoothctl(*args, timeout=30):
 	except subprocess.TimeoutExpired:
 		return "timed out"
 	return (result.stdout + result.stderr).strip()
+
+
+def pair(address, timeout=30):
+	"""Pair with a device. Return bluetoothctl's output (for error messages).
+
+	A one-shot "bluetoothctl pair ADDR" registers no agent and leaves the adapter unpairable,
+	so a device that asks for confirmation fails with AuthenticationCanceled. Instead this
+	runs an interactive bluetoothctl session: register a NoInputNoOutput agent (it accepts
+	"just works" pairing by itself), make it the default, pair, and wait for the result."""
+	try:
+		proc = subprocess.Popen(["bluetoothctl"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT)
+	except FileNotFoundError:
+		raise Failure("bluetoothctl is missing (install bluez-utils).")
+	proc.stdin.write(f"agent NoInputNoOutput\ndefault-agent\npair {address}\n".encode())
+	proc.stdin.flush()
+
+	# Raw reads from the pipe: a buffered readline() would hide lines from select()
+	output = b""
+	fd = proc.stdout.fileno()
+	deadline = time.monotonic() + timeout
+	with selectors.DefaultSelector() as sel:
+		sel.register(fd, selectors.EVENT_READ)
+		while (left := deadline - time.monotonic()) > 0:
+			if not sel.select(timeout=left):
+				continue
+			chunk = os.read(fd, 4096)
+			if not chunk:
+				break
+			output += chunk
+			if any(m in output for m in PAIR_RESULTS):
+				break
+	try:
+		proc.stdin.write(b"quit\n")
+		proc.stdin.flush()
+		proc.wait(timeout=5)
+	except (BrokenPipeError, subprocess.TimeoutExpired):
+		proc.kill()
+	text = output.decode(errors="replace")
+	# Return just the line with the result: the agent's own replies may arrive after it
+	for line in strip_colors(text).split("\n"):
+		if any(m.decode() in line for m in PAIR_RESULTS):
+			return last_line(line)
+	return text
 
 
 def notify(title, body="", critical=False):
@@ -201,7 +253,7 @@ def device_menu(d):
 	if not d["paired"]:
 		# Pair first, so the link key is stored and it reconnects by itself next time
 		# (a bare connect works too, but leaves the device unbonded)
-		bluetoothctl("--timeout", "30", "pair", d["address"], timeout=30)
+		pair(d["address"])
 		bluetoothctl("trust", d["address"])
 	out = bluetoothctl("--timeout", "20", "connect", d["address"], timeout=20)
 	if (device(d["address"]) or {}).get("connected"):
@@ -212,21 +264,19 @@ def device_menu(d):
 
 
 def last_line(text):
-	"""The last meaningful line of bluetoothctl's output, without its color codes."""
-	lines = [line for line in strip_colors(text).splitlines() if line.strip() and "[CHG]" not in line]
-	return lines[-1].strip() if lines else ""
+	"""The last meaningful line of bluetoothctl's output, without its color codes,
+	the interactive prompt ("[device]> "), or the redraws a "\r" leaves behind."""
+	lines = []
+	for line in strip_colors(text).split("\n"):
+		line = PROMPT.sub("", line.split("\r")[-1]).strip()
+		if line and "[CHG]" not in line:
+			lines.append(line)
+	return lines[-1] if lines else ""
 
 
 def strip_colors(text):
-	out, skip = [], False
-	for c in text:
-		if c == "\x1b":
-			skip = True
-		elif skip:
-			skip = c != "m"
-		else:
-			out.append(c)
-	return "".join(out)
+	"""Remove terminal escape codes: colors (ESC[0;94m) and line clears (ESC[K)."""
+	return ESCAPE.sub("", text)
 
 
 def scan_and_pair():
@@ -266,7 +316,7 @@ def scan_and_pair():
 	name = d["name"]
 
 	notify("Bluetooth", f"Pairing with {name}…")
-	out = bluetoothctl("--timeout", "30", "pair", d["address"], timeout=30)
+	out = pair(d["address"])
 	if not (device(d["address"]) or {}).get("paired"):
 		notify("Bluetooth", f"Couldn't pair with {name}.\n{last_line(out)}", critical=True)
 		return 1
