@@ -39,8 +39,6 @@ hl.monitor({ output = "eDP-1",    mode = "preferred",       position = "160x900"
 hl.monitor({ output = "",         mode = "preferred",       position = "auto",  scale = "auto" })
 
 -- ---------- environment ----------
--- Dark GTK apps (Firefox's menus and pages included)
-hl.env("GTK_THEME", "Adwaita:dark")
 -- Mouse cursor: Makima-Crimson, 24 px (built by makima-sway's "install.sh --cursor")
 hl.env("XCURSOR_THEME", "Makima-Crimson")
 hl.env("XCURSOR_SIZE", "24")
@@ -50,9 +48,14 @@ hl.on("hyprland.start", function()
     -- GTK3 apps (like Firefox) read the cursor from here on Wayland
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme Makima-Crimson")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 24")
+    -- Dark mode: libadwaita/Firefox read it from the portal (color-scheme); GTK3 gets it
+    -- from ~/.config/gtk-3.0/settings.ini. GTK_THEME env would break libadwaita styling.
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
     -- Tell systemd and D-Bus which display this is, so services they start (the screen
     -- sharing portal, dunst, ...) can find it. Sway does this in /etc/sway/config.d.
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
+    -- The portals start at login, before this env exists: restart them once it is set.
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE"
+        .. " && systemctl --user restart xdg-desktop-portal-gtk xdg-desktop-portal-hyprland xdg-desktop-portal")
     -- Wallpaper, idle (lock at 10 min, screens off at 11) and the password prompt for apps
     -- that need root. Their configs: ~/.config/hypr/hyprpaper.conf, hypridle.conf, hyprlock.conf
     hl.exec_cmd("hyprpaper")
@@ -62,7 +65,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("waybar -c " .. M .. "/config/waybar/config.jsonc -s " .. M .. "/config/waybar/style.css")
     -- Only one dunst can run per user (D-Bus), and Sway's may still be up on tty1: replace it
     -- so notifications show here. (While both run, Sway's notifications then show here too.)
-    hl.exec_cmd("pkill -x dunst; sleep 0.3; dunst --config " .. M .. "/config/dunst/dunstrc")
+    -- Wait for the old one to exit instead of a fixed delay, or the D-Bus name is still taken.
+    hl.exec_cmd("pkill -x dunst; while pgrep -x dunst >/dev/null; do sleep 0.05; done; dunst --config " .. M .. "/config/dunst/dunstrc")
 end)
 
 -- ---------- look ----------
@@ -152,6 +156,12 @@ hl.config({
             natural_scroll       = false,
             disable_while_typing = true,
         },
+    },
+
+    -- Software cursor: drawn in the same frame as everything else, so it never lags a frame
+    -- behind on the Intel GPU. Picked in a blind A/B/C test against hardware (0) and auto (2).
+    cursor = {
+        no_hardware_cursors = 1,
     },
 
     dwindle = {

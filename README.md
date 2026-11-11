@@ -141,7 +141,7 @@ Tested on **Arch Linux** with Hyprland 0.57.1, hyprlock 0.9.7, hypridle 0.1.8, h
 
 ```bash
 sudo pacman -S --needed \
-	hyprland hyprlock hypridle hyprpaper xdg-desktop-portal-hyprland hyprpolkitagent \
+	hyprland hyprlock hypridle hyprpaper xdg-desktop-portal-hyprland xdg-desktop-portal-gtk hyprpolkitagent \
 	waybar foot fuzzel dunst libnotify \
 	grim slurp wl-clipboard xorg-xwayland \
 	brightnessctl pipewire wireplumber iwd bluez bluez-utils \
@@ -150,7 +150,7 @@ sudo pacman -S --needed \
 
 For the shell part (optional): `zsh starship zsh-syntax-highlighting zsh-autosuggestions`.
 
-`bluez` needs `sudo systemctl enable --now bluetooth`. The Wi-Fi module and menu expect **iwd**, not NetworkManager. `python-gobject`, `gtk4` and `libadwaita` are only for the settings window. `ffmpeg` builds the wallpaper. `curl` and `xz` are needed only by `install.sh --cursor`.
+`bluez` needs `sudo systemctl enable --now bluetooth`. The Wi-Fi module and menu expect **iwd**, not NetworkManager. Dark mode comes from the portal (`xdg-desktop-portal-gtk`, set up by `hyprland.lua`) for GTK4 apps and Firefox, and from `gtk-application-prefer-dark-theme=1` in `~/.config/gtk-3.0/settings.ini` for GTK3 apps. `python-gobject`, `gtk4` and `libadwaita` are only for the settings window. `ffmpeg` builds the wallpaper. `curl` and `xz` are needed only by `install.sh --cursor`.
 
 ### Things that are specific to my machine
 
