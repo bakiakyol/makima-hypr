@@ -93,6 +93,7 @@ Workspaces slide 12 % while they fade, so a switch has a direction. The dropdown
 | Screenshots | grim + slurp + wl-clipboard | `bin/screenshot` |
 | Wi-Fi | iwd (D-Bus) | `bin/wifi-menu` |
 | Bluetooth | BlueZ (D-Bus + bluetoothctl) | `bin/bluetooth-menu` |
+| Settings | GTK4 + libadwaita | `bin/settings`, saves to `config/hypr/settings.lua` |
 | Cursor | Bibata Modern Amber, recolored crimson | `design/recolor-cursor.py` |
 | Font | JetBrainsMono Nerd Font | – |
 
@@ -144,12 +145,12 @@ sudo pacman -S --needed \
 	waybar foot fuzzel dunst libnotify \
 	grim slurp wl-clipboard xorg-xwayland \
 	brightnessctl pipewire wireplumber iwd bluez bluez-utils \
-	python ffmpeg ttf-jetbrains-mono-nerd
+	python python-gobject gtk4 libadwaita ffmpeg ttf-jetbrains-mono-nerd
 ```
 
 For the shell part (optional): `zsh starship zsh-syntax-highlighting zsh-autosuggestions`.
 
-`bluez` needs `sudo systemctl enable --now bluetooth`. The Wi-Fi module and menu expect **iwd**, not NetworkManager. `ffmpeg` builds the wallpaper. `curl` and `xz` are needed only by `install.sh --cursor`.
+`bluez` needs `sudo systemctl enable --now bluetooth`. The Wi-Fi module and menu expect **iwd**, not NetworkManager. `python-gobject`, `gtk4` and `libadwaita` are only for the settings window. `ffmpeg` builds the wallpaper. `curl` and `xz` are needed only by `install.sh --cursor`.
 
 ### Things that are specific to my machine
 
@@ -305,6 +306,7 @@ All in `bin/`, linked into `~/.local/bin`:
 | `dnd` | Do Not Disturb toggle (`dnd status` feeds the bar's bell) |
 | `battery-warning` | Low battery popup at 15 % and 7 %, run every 2 minutes by a systemd user timer |
 | `wifi-menu` | Wi-Fi networks from iwd in fuzzel: connect, disconnect, forget, enter a password |
+| `settings` | A settings window (the gear at the right end of the bar): mouse, touchpad, keyboard, gaps, effects, volume, brightness |
 | `bluetooth-menu` | Known Bluetooth devices in fuzzel: connect, disconnect, forget, or scan and pair a new one. A device whose pairing got lost is paired again on Connect |
 
 And in `tools/`, not linked anywhere:
@@ -317,6 +319,8 @@ And in `tools/`, not linked anywhere:
 ---
 
 ## Customization
+
+**Settings window.** Click the gear on the bar or run `settings`. Changes apply at once and are saved to `config/hypr/settings.lua`, which `hyprland.lua` loads last. That file is git-ignored, and the undo button deletes it, so `hyprland.lua` always keeps the defaults.
 
 **Save battery.** In `hyprland.lua`, set `wobble.enabled` to `false` first (it costs 3 to 4 times the CPU of having it off), then `blur` and `shadow`. Setting `animations = { enabled = false }` turns all motion off.
 
