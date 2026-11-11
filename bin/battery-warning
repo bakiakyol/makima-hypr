@@ -13,19 +13,26 @@ CRITICAL=7
 # The laptop battery: type "Battery", but not a "Device" one (a wireless mouse, a gamepad)
 bat=
 for d in /sys/class/power_supply/*; do
-	[ "$(cat "$d/type" 2>/dev/null)" = Battery ] || continue
-	[ "$(cat "$d/scope" 2>/dev/null)" = Device ] && continue
+	ptype=
+	read -r ptype 2>/dev/null <"$d/type"
+	[ "$ptype" = Battery ] || continue
+	pscope=
+	read -r pscope 2>/dev/null <"$d/scope"
+	[ "$pscope" = Device ] && continue
 	bat=$d
 	break
 done
 [ -n "$bat" ] && [ -r "$bat/capacity" ] || exit 0
 
-cap=$(cat "$bat/capacity")
-status=$(cat "$bat/status")
+read -r cap <"$bat/capacity"
+status=
+read -r status 2>/dev/null <"$bat/status"
 
 # The last warning given ("", low, critical), kept until the next reboot
-state_file="${XDG_RUNTIME_DIR:-/tmp}/battery-warning-$(id -u)"
-last=$(cat "$state_file" 2>/dev/null)
+# ${UID} is set by bash/zsh (no fork); other shells fall back to id -u
+state_file="${XDG_RUNTIME_DIR:-/tmp}/battery-warning-${UID:-$(id -u)}"
+last=
+read -r last 2>/dev/null <"$state_file"
 
 notify() {
 	notify-send -a battery-warning -h string:x-dunst-stack-tag:battery "$@"
