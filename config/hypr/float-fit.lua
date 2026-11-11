@@ -82,16 +82,22 @@ end
 hl.on("window.open", fit_later)
 hl.on("window.move_to_workspace", fit_later)
 -- The dropdown terminal keeps the size it got on the monitor where it was first opened:
--- give it that monitor's standard size each time it is shown somewhere
-hl.on("workspace.special_active", function()
+-- give it that monitor's standard size each time it is shown somewhere.
+-- Deferred like fit_later: this event also fires from inside the map of the first dropdown
+-- window, and resizing a window that is still being mapped crashes Hyprland 0.57.1.
+local function special_shown()
     local mon = hl.get_active_monitor()
     local ws = mon and mon.active_special_workspace
     if not ws then return end
     for _, win in ipairs(hl.get_windows()) do
-        if win.workspace and win.workspace.name == ws.name and win.floating then
+        if win.mapped and win.floating and win.workspace and win.workspace.name == ws.name then
             if win.class == "dropdown" then standard(win) else fit(win) end
         end
     end
+end
+
+hl.on("workspace.special_active", function()
+    hl.timer(special_shown, { timeout = 60, type = "oneshot" })
 end)
 
 return { float_toggle = float_toggle }
