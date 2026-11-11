@@ -144,6 +144,8 @@ hl.config({
         -- Turkish Q layout. Change "tr" to your own layout (us, de, ...).
         kb_layout    = "tr",
         follow_mouse = 1,
+        -- Mouse wheel: natural (Mac-style) scroll direction
+        natural_scroll = true,
         -- Touchpad: tap to click, normal scroll direction, ignore while typing
         touchpad = {
             tap_to_click         = true,
@@ -243,6 +245,15 @@ hl.window_rule({
     center    = true,
     workspace = "special:dropdown",
     animation = "slide top",
+})
+
+-- Settings window (bin/settings): floating and centered, too small to read when tiled
+hl.window_rule({
+    name   = "settings",
+    match  = { class = "^io\\.github\\.bakiakyol\\.makima\\.settings$" },
+    float  = true,
+    size   = { "700", "monitor_h*0.8" },
+    center = true,
 })
 
 -- ---------- helpers ----------
@@ -362,3 +373,13 @@ end)
 -- ---------- per-monitor dimming ----------
 -- Each monitor keeps its own last focused window bright (see the dim_inactive comment above)
 dofile(M .. "/config/hypr/dim-per-monitor.lua")
+
+-- ---------- settings window ----------
+-- Values changed in the settings window (bin/settings) are saved to settings.lua, loaded last
+-- so they win over the values above. It doesn't exist until you change something there.
+local settings = M .. "/config/hypr/settings.lua"
+local f = io.open(settings, "r")
+if f then
+    f:close()
+    dofile(settings)
+end

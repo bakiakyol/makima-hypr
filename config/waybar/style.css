@@ -99,7 +99,8 @@ tooltip label {
 #bluetooth,
 #wireplumber,
 #backlight,
-#battery {
+#battery,
+#custom-settings {
 	padding: 0 10px;
 }
 
@@ -121,6 +122,10 @@ tooltip label {
 #wireplumber.muted { color: @muted; }
 
 #backlight { color: @text; }
+
+/* Settings gear: muted, crimson on hover */
+#custom-settings       { color: @muted; }
+#custom-settings:hover { color: @crimson; }
 
 #battery                         { color: @text; }
 #battery.charging,

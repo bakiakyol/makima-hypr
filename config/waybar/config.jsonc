@@ -12,8 +12,8 @@
 	"modules-left": ["hyprland/workspaces", "hyprland/submap"],
 	// Center: date and time
 	"modules-center": ["clock"],
-	// Right: keep awake, Do Not Disturb bell (only while on), Wi-Fi, volume, brightness, battery
-	"modules-right": ["idle_inhibitor", "custom/dnd", "network", "bluetooth", "wireplumber", "backlight", "battery"],
+	// Right: keep awake, Do Not Disturb bell (only while on), Wi-Fi, volume, brightness, battery, settings
+	"modules-right": ["idle_inhibitor", "custom/dnd", "network", "bluetooth", "wireplumber", "backlight", "battery", "custom/settings"],
 
 	"hyprland/workspaces": {
 		// Each bar shows only its own screen's workspaces, and only the ones in use
@@ -110,6 +110,13 @@
 	},
 
 	// Change "bat" and "adapter" to yours (ls /sys/class/power_supply).
+	// A gear that opens the settings window (~/.config/makima-hypr/bin/settings)
+	"custom/settings": {
+		"format": "󰒓",
+		"tooltip-format": "Settings",
+		"on-click": "~/.config/makima-hypr/bin/settings"
+	},
+
 	"battery": {
 		"bat": "BAT0",
 		"adapter": "ADP0",
